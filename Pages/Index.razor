@@ -1,0 +1,54 @@
+@page "/"
+@using EventEase.Components
+
+<PageTitle>EventEase - Home</PageTitle>
+
+<div class="home-page">
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Welcome to EventEase</h1>
+            <p class="lead">Your premier event management solution</p>
+            <p>Discover, register, and manage events with ease</p>
+        </div>
+        
+        <!-- Login Form on Home Page -->
+        <div class="hero-login">
+            <UserLogin />
+        </div>
+    </div>
+    
+    <!-- Features -->
+    <div class="features-section">
+        <h2>Why Choose EventEase?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Easy Registration</h3>
+                <p>Simple and quick event registration process</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Dashboard</h3>
+                <p>Track all your events in one place</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔔</div>
+                <h3>Notifications</h3>
+                <p>Get reminders for upcoming events</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Secure</h3>
+                <p>Your data is protected</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Call to Action -->
+    <div class="cta-section">
+        <h2>Ready to Get Started?</h2>
+        <p>Join thousands of users managing their events with EventEase</p>
+        <a href="/events" class="btn btn-primary btn-lg">Browse Events</a>
+    </div>
+</div>

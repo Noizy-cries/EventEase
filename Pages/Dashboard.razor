@@ -1,0 +1,223 @@
+@page "/dashboard"
+@using EventEase.Models
+@using EventEase.Services
+@inject AppState AppState
+@inject EventService EventService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>EventEase - Dashboard</PageTitle>
+
+@if (!AppState.IsLoggedIn)
+{
+    <div class="not-authorized">
+        <h2>Access Denied</h2>
+        <p>Please login to view your dashboard.</p>
+        <button class="btn btn-primary" @onclick="GoToHome">Go to Home</button>
+    </div>
+}
+else
+{
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Welcome, @AppState.CurrentUser?.Name!</h1>
+            <div class="user-info">
+                <span class="badge bg-primary">@AppState.CurrentUser?.Email</span>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="Logout">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <h3>@registrationCount</h3>
+                    <p>Events Registered</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <h3>@upcomingCount</h3>
+                    <p>Upcoming Events</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👤</div>
+                <div class="stat-content">
+                    <h3>@GetFirstName()</h3>
+                    <p>Welcome back!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- My Registrations -->
+        <div class="section">
+            <div class="section-header">
+                <h2>My Event Registrations</h2>
+                <a href="/events" class="btn btn-sm btn-primary">Browse More Events</a>
+            </div>
+            
+            @if (registrations.Any())
+            {
+                <div class="registrations-grid">
+                    @foreach (var reg in registrations)
+                    {
+                        <div class="registration-card">
+                            <div class="card-header">
+                                <h3>@reg.FullName</h3>
+                                <span class="badge bg-success">Confirmed</span>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Event:</strong> @GetEventName(reg.EventId)</p>
+                                <p><strong>Email:</strong> @reg.Email</p>
+                                <p><strong>Registered on:</strong> @reg.RegistrationDate.ToString("MMMM dd, yyyy hh:mm tt")</p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="/event/@reg.EventId" class="btn btn-sm btn-outline-primary">
+                                    View Event
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelRegistration(reg.Id)">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">📅</div>
+                    <h3>No Registrations Yet</h3>
+                    <p>You haven't registered for any events. Browse events to get started!</p>
+                    <a href="/events" class="btn btn-primary">Browse Events</a>
+                </div>
+            }
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="section">
+            <h2>Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="/events" class="action-card">
+                    <div class="action-icon">🔍</div>
+                    <h4>Browse Events</h4>
+                    <p>Discover upcoming events</p>
+                </a>
+                <a href="/" class="action-card">
+                    <div class="action-icon">👤</div>
+                    <h4>My Profile</h4>
+                    <p>View and edit profile</p>
+                </a>
+                <div class="action-card" @onclick="ExportRegistrations">
+                    <div class="action-icon">📤</div>
+                    <h4>Export Data</h4>
+                    <p>Download registrations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Registration> registrations = new();
+    private List<Event> allEvents = new();
+    private int registrationCount = 0;
+    private int upcomingCount = 0;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (AppState.IsLoggedIn)
+        {
+            await LoadDashboardData();
+            AppState.OnChange += StateHasChanged;
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+    
+    private async Task LoadDashboardData()
+    {
+        registrations = AppState.GetUserRegistrations();
+        registrationCount = registrations.Count;
+        
+        // Get all events
+        allEvents = await EventService.GetEventsAsync();
+        upcomingCount = allEvents.Count(e => e.Date >= DateTime.Today);
+    }
+    
+    private string GetFirstName()
+    {
+        return AppState.CurrentUser?.Name.Split(' ')[0] ?? "User";
+    }
+    
+    private string GetEventName(int eventId)
+    {
+        var evt = allEvents.FirstOrDefault(e => e.Id == eventId);
+        return evt?.Name ?? "Unknown Event";
+    }
+    
+    private async Task CancelRegistration(int registrationId)
+    {
+        var reg = registrations.FirstOrDefault(r => r.Id == registrationId);
+        if (reg != null)
+        {
+            registrations.Remove(reg);
+            registrationCount = registrations.Count;
+            await EventService.UpdateEventSpotsAsync(reg.EventId, 1);
+            StateHasChanged();
+        }
+    }
+    
+    private async Task ExportRegistrations()
+    {
+        try
+        {
+            var exportData = $"EventEase Registrations for {AppState.CurrentUser?.Name}\n\n";
+            foreach (var reg in registrations)
+            {
+                var eventName = GetEventName(reg.EventId);
+                exportData += $"Event: {eventName}\n";
+                exportData += $"Name: {reg.FullName}\n";
+                exportData += $"Email: {reg.Email}\n";
+                exportData += $"Date: {reg.RegistrationDate.ToString("yyyy-MM-dd")}\n";
+                exportData += "---\n";
+            }
+            
+            // Create download
+            var fileName = $"EventEase_Registrations_{DateTime.Now:yyyyMMdd}.txt";
+            await DownloadFile(fileName, exportData);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Export error: {ex.Message}");
+        }
+    }
+    
+    private async Task DownloadFile(string filename, string content)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+        var base64 = Convert.ToBase64String(bytes);
+        await JSRuntime.InvokeVoidAsync("downloadFile", filename, base64);
+    }
+    
+    private void Logout()
+    {
+        AppState.Logout();
+        NavigationManager.NavigateTo("/");
+    }
+    
+    private void GoToHome() => NavigationManager.NavigateTo("/");
+    
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+}

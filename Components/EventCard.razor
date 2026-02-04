@@ -1,0 +1,37 @@
+@namespace EventEase.Components
+@using EventEase.Models
+
+<div class="event-card">
+    <div class="card-header">
+        <h3>@Event?.Name</h3>
+    </div>
+    <div class="card-body">
+        <p><strong>Date:</strong> @Event?.Date.ToString("MMMM dd, yyyy")</p>
+        <p><strong>Time:</strong> @Event?.Time.ToString(@"hh\:mm")</p>
+        <p><strong>Location:</strong> @Event?.Location</p>
+        <p><strong>Available Spots:</strong> @Event?.AvailableSpots</p>
+        <p class="description">@Event?.Description</p>
+    </div>
+    <div class="card-footer">
+        <button class="btn btn-primary" @onclick="() => ViewDetails(Event?.Id ?? 0)">
+            View Details
+        </button>
+        <button class="btn btn-success" @onclick="() => RegisterForEvent(Event?.Id ?? 0)">
+            Register
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Event? Event { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnViewDetails { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnRegister { get; set; }
+
+    private async Task ViewDetails(int eventId) => await OnViewDetails.InvokeAsync(eventId);
+    private async Task RegisterForEvent(int eventId) => await OnRegister.InvokeAsync(eventId);
+}

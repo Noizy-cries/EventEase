@@ -1,0 +1,44 @@
+@page "/confirmation/{RegistrationId:int}"
+@using EventEase.Services
+@inject AppState AppState
+@inject NavigationManager NavigationManager
+
+<PageTitle>EventEase - Registration Confirmation</PageTitle>
+
+<div class="confirmation">
+    <div class="confirmation-icon">
+        <span style="font-size: 4rem; color: green;">✓</span>
+    </div>
+    
+    <h1>Registration Successful!</h1>
+    <p>Thank you for registering. Your registration has been confirmed.</p>
+    
+    <div class="confirmation-details">
+        <p><strong>Registration ID:</strong> @RegistrationId</p>
+        <p><strong>Total Registrations:</strong> @AppState.GetRegistrations().Count()</p>
+        <p><strong>Confirmation sent to:</strong> @GetLastRegistrationEmail()</p>
+    </div>
+    
+    <div class="confirmation-actions">
+        <button class="btn btn-primary" @onclick="GoToEvents">Browse More Events</button>
+        <button class="btn btn-secondary" @onclick="GoHome">Return Home</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int RegistrationId { get; set; }
+
+    private string GetLastRegistrationEmail()
+    {
+        var registrations = AppState.GetRegistrations();
+        if (registrations.Any())
+        {
+            return registrations.Last().Email;
+        }
+        return "N/A";
+    }
+
+    private void GoToEvents() => NavigationManager.NavigateTo("/events");
+    private void GoHome() => NavigationManager.NavigateTo("/");
+}

@@ -1,0 +1,49 @@
+@namespace EventEase.Components
+@using EventEase.Models
+@using EventEase.Services
+@inject AppState AppState
+
+<div class="attendance-tracker">
+    <h3>Your Registrations</h3>
+    
+    @if (registrations.Any())
+    {
+        <div class="registration-list">
+            @foreach (var reg in registrations)
+            {
+                <div class="registration-item">
+                    <div class="reg-info">
+                        <strong>@reg.FullName</strong>
+                        <span>Registered: @reg.RegistrationDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="reg-status">
+                        <span class="badge bg-success">Confirmed</span>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="stats">
+            <p>Total Registrations: <strong>@registrations.Count</strong></p>
+        </div>
+    }
+    else
+    {
+        <p class="no-registrations">You haven't registered for any events yet.</p>
+    }
+</div>
+
+@code {
+    private List<Registration> registrations = new();
+    
+    protected override void OnInitialized()
+    {
+        registrations = AppState.GetRegistrations();
+        AppState.OnChange += StateHasChanged;
+    }
+    
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+}

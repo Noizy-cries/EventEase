@@ -1,0 +1,259 @@
+/* wwwroot/css/app.css */
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+a, .btn-link {
+    color: #0366d6;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid red;
+}
+
+.validation-message {
+    color: red;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+/* Add our EventEase specific styles */
+.not-found {
+    text-align: center;
+    padding: 50px;
+    margin-top: 50px;
+}
+
+.loading {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.registration-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    margin-top: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.form-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+}
+
+.attendance-tracker {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.registration-list {
+    margin: 10px 0;
+}
+
+.registration-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.validation-message {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 5px;
+}
+
+.confirmation {
+    text-align: center;
+    padding: 50px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.confirmation-icon {
+    margin-bottom: 20px;
+}
+
+.confirmation-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.hero {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.hero-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.features {
+    margin-top: 50px;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.feature {
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.event-details {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-item strong {
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.description {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .confirmation-actions {
+        flex-direction: column;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+}
+/* Add to existing app.css */
+.attendance-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .attendance-section h3 {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.sidebar .attendance-section .registration-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    padding: 8px;
+}
+
+.sidebar .attendance-section .no-registrations {
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+}

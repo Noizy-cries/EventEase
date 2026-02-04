@@ -1,0 +1,151 @@
+@page "/register/{EventId:int}"
+@using EventEase.Models
+@using EventEase.Services
+@using System.ComponentModel.DataAnnotations
+@inject EventService EventService
+@inject NavigationManager NavigationManager
+@inject AppState AppState
+
+<PageTitle>EventEase - Registration</PageTitle>
+
+@if (isLoading)
+{
+    <div class="loading">Loading registration form...</div>
+}
+else if (eventItem != null)
+{
+    <div class="registration-form">
+        <h1>Register for: @eventItem.Name</h1>
+        
+        <EditForm Model="registration" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            
+            <div class="form-group">
+                <label for="fullName">Full Name *</label>
+                <InputText id="fullName" @bind-Value="registration.FullName" class="form-control" />
+                <ValidationMessage For="@(() => registration.FullName)" />
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <InputText id="email" @bind-Value="registration.Email" class="form-control" />
+                <ValidationMessage For="@(() => registration.Email)" />
+            </div>
+            
+            <div class="form-group">
+                <label>Event Details:</label>
+                <div class="event-info">
+                    <p><strong>Date:</strong> @eventItem.Date.ToString("MMMM dd, yyyy")</p>
+                    <p><strong>Location:</strong> @eventItem.Location</p>
+                    <p><strong>Available Spots:</strong> @eventItem.AvailableSpots</p>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success" disabled="@(eventItem.AvailableSpots <= 0 || isSubmitting)">
+                    @if (isSubmitting)
+                    {
+                        <span>Processing...</span>
+                    }
+                    else if (eventItem.AvailableSpots <= 0)
+                    {
+                        <span>Event Full</span>
+                    }
+                    else
+                    {
+                        <span>Complete Registration</span>
+                    }
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                    Cancel
+                </button>
+            </div>
+        </EditForm>
+    </div>
+}
+else
+{
+    <div class="not-found">
+        <h1>Event Not Found</h1>
+        <p>Cannot register for an event that doesn't exist.</p>
+        <button class="btn btn-primary" @onclick="GoToEvents">Browse Events</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int EventId { get; set; }
+
+    private Event? eventItem;
+    private RegistrationModel registration = new();
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (EventId <= 0)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        
+        isLoading = true;
+        eventItem = await EventService.GetEventAsync(EventId);
+        isLoading = false;
+        
+        if (eventItem == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+private async Task HandleValidSubmit()
+{
+    if (eventItem != null && eventItem.AvailableSpots > 0 && !isSubmitting)
+    {
+        isSubmitting = true;
+        
+        try
+        {
+            // Get the next ID from user's registrations
+            var userRegistrations = AppState.GetUserRegistrations();
+            var nextId = userRegistrations.Any() ? userRegistrations.Max(r => r.Id) + 1 : 1;
+            
+            var newRegistration = new Registration
+            {
+                Id = nextId,
+                EventId = EventId,
+                FullName = registration.FullName,
+                Email = registration.Email,
+                RegistrationDate = DateTime.Now
+            };
+
+            AppState.AddRegistration(newRegistration);
+            await EventService.UpdateEventSpotsAsync(EventId, -1);
+            
+            // Navigate to confirmation page
+            NavigationManager.NavigateTo($"/confirmation/{newRegistration.Id}");
+        }
+        catch
+        {
+            isSubmitting = false;
+            // You could show an error message here
+        }
+    }
+}
+    private void Cancel() => NavigationManager.NavigateTo($"/event/{EventId}");
+    private void GoToEvents() => NavigationManager.NavigateTo("/events");
+
+    public class RegistrationModel
+    {
+        [Required(ErrorMessage = "Full name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
+        [RegularExpression(@"^[a-zA-Z\s]*$", ErrorMessage = "Name can only contain letters and spaces")]
+        public string FullName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Email { get; set; } = string.Empty;
+    }
+}

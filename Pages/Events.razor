@@ -1,0 +1,65 @@
+@page "/events"
+@using EventEase.Models
+@using EventEase.Services
+@inject EventService EventService
+@inject NavigationManager NavigationManager
+
+<PageTitle>EventEase - Events</PageTitle>
+
+<h1>Upcoming Events</h1>
+
+@if (isLoading)
+{
+    <div class="loading">
+        <p>Loading events...</p>
+    </div>
+}
+else if (events?.Any() == true)
+{
+    <div class="event-grid">
+        @foreach (var evt in events)
+        {
+            <EventCard 
+                Event="@evt" 
+                OnViewDetails="ViewEventDetails"
+                OnRegister="NavigateToRegistration" />
+        }
+    </div>
+}
+else
+{
+    <p>No events available at the moment. Please check back later.</p>
+}
+
+@code {
+    private List<Event>? events;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEvents();
+    }
+
+    private async Task LoadEvents()
+    {
+        isLoading = true;
+        StateHasChanged();
+        
+        await Task.Delay(100);
+        var allEvents = await EventService.GetEventsAsync();
+        events = allEvents.Where(e => e.Date >= DateTime.Today).ToList();
+        
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ViewEventDetails(int eventId)
+    {
+        NavigationManager.NavigateTo($"/event/{eventId}");
+    }
+
+    private void NavigateToRegistration(int eventId)
+    {
+        NavigationManager.NavigateTo($"/register/{eventId}");
+    }
+}
